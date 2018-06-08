@@ -15,6 +15,7 @@ import logging
 import os
 import re
 from SublimeLinter.lint import NodeLinter
+import sublime
 
 
 logger = logging.getLogger('SublimeLinter.plugin.eslint')
@@ -34,6 +35,14 @@ class ESLint(NodeLinter):
     defaults = {
         'selector': 'source.js - meta.attribute-with-value'
     }
+
+    def __init__(self, view, syntax):
+        settings = sublime.load_settings("SublimeLinter-eslint.sublime-settings")
+        if settings.get('mode') == 'auto-fix':
+            self.cmd = 'eslint --fix ${file}'
+        else:
+            self.cmd = 'eslint --format json --stdin --stdin-filename ${file}'
+        super().__init__(view, syntax)
 
     def on_stderr(self, stderr):
         # Demote 'annoying' config is missing error to a warning.
